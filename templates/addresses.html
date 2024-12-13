@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Solo Room{% endblock %}
+
+{% block content %}
+    <!-- Header -->
+    <header id="header" class="ex-header">
+        <div class="container">
+            <div class="row">
+                <div id="carouselExample" class="carousel slide">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="card m-auto" style="width: 30rem;">
+                                <div class="card-header d-flex justify-content-between align-items-center" style="gap: 1rem;" >
+                                    <div class="d-flex align-items-center" style="gap: 1rem;" >
+                                        <img src="{% static 'img/china-flag.png' %}"  style="height: 30px;" alt="china-flag">
+                                        <b>ჩინეთის მისამართი</b>
+                                    </div>
+                                    <b>ტარიფი ${{ china_address.price }}</b>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Name: </b><span id="name">{{ china_address.name }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('name')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Address: </b><span id="address">{{ china_address.address }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('address')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Street: </b><span id="street">{{ china_address.street }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('street')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>District: </b><span id="district">{{ china_address.district }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('district')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>City: </b><span id="city">{{ china_address.city }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('city')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Province: </b><span id="province">{{ china_address.province }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('province')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>ZIP: </b><span id="zip">{{ china_address.zip }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('zip')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Phone: </b><span id="phone">{{ china_address.phone }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('phone')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="carousel-item ">
+                            <div class="card m-auto" style="width: 30rem;">
+                                <div class="card-header d-flex justify-content-between align-items-center" style="gap: 1rem;" >
+                                    <div class="d-flex align-items-center" style="gap: 1rem;" >
+                                        <img src="{% static 'img/usa-flag.png' %}"  style="height: 30px;" alt="china-flag">
+                                        <b>ამერიკის მისამართი</b>
+                                    </div>
+                                    <b>ტარიფი ${{ usa_address.price }}</b>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Name: </b><span id="name">{{ usa_address.name }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('name')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Address1: </b><span id="address">{{ usa_address.address1 }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('address')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Address2: </b><span id="street">{{ usa_address.address2 }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('street')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>City: </b><span id="city">{{ usa_address.city }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('city')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>State: </b><span id="province">{{ usa_address.state }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('province')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>ZIP: </b><span id="zip">{{ usa_address.zip }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('zip')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: lightgray">
+                                        <span><b>Phone: </b><span id="phone">{{ usa_address.phone }}</span></span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('phone')"><i class="fa-solid fa-copy"></i></button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div> <!-- end of container -->
+    </header> <!-- end of ex-header -->
+    <!-- end of header -->
+
+{% endblock %}
