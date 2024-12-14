@@ -18,11 +18,11 @@ class UserAddressesView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        china_static_address = ChinaAddress.objects.all().first()
-        usa_static_address = USAAddress.objects.all().first()
+        china_static_address = ChinaAddress.objects.all().select_related('country').first()
+        usa_static_address = USAAddress.objects.all().select_related('country').first()
 
         china_address = {
-            "price": china_static_address.price,
+            "price": china_static_address.country.transporting_price,
             "name": f"{self.request.user.first_name_en} {self.request.user.last_name_en}",
             "address": f"{china_static_address.address}{self.request.user.room_number}",
             "street": china_static_address.street,
@@ -34,7 +34,7 @@ class UserAddressesView(TemplateView):
         }
 
         usa_address = {
-            "price": usa_static_address.price,
+            "price": usa_static_address.country.transporting_price,
             "name": f"{self.request.user.first_name_en} {self.request.user.last_name_en}",
             "address1": usa_static_address.address_1,
             "address2": self.request.user.room_number,
