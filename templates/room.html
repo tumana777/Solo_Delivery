@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Room {% endblock %}
+
+{% block content %}
+    <header class="ex-header" style="padding-top: 0; padding-bottom: 7rem;">
+    </header>
+    <div class="container">
+        <form method="get" class="mt-5 d-flex justify-content-between flex-wrap">
+            <button type="submit"
+                    class="parcel-wrapper {% if status_filter == 'საწყობშია' %}active-parcel-list{% endif %}"
+                    value="საწყობშია"
+                    name="status">მიღებული ამანათები
+            </button>
+
+            <button type="submit"
+                    class="parcel-wrapper {% if status_filter == 'მოლოდინშია' %}active-parcel-list{% endif %}"
+                    value="მოლოდინშია"
+                    name="status">მისაღები ამანათები
+            </button>
+
+            <button type="submit"
+                    class="parcel-wrapper {% if status_filter == 'ჩამოსულია' %}active-parcel-list{% endif %}"
+                    value="ჩამოსულია"
+                    name="status">ჩამოსული ამანათები
+            </button>
+
+            <button type="submit"
+                    class="parcel-wrapper {% if status_filter == 'გზაშია' %}active-parcel-list{% endif %}"
+                    value="გზაშია"
+                    name="status">გამოგზავნილი ამანათები
+            </button>
+
+            <button type="submit"
+                    class="parcel-wrapper {% if status_filter == 'შეჩერებულია' %}active-parcel-list{% endif %}"
+                    value="შეჩერებულია"
+                    name="status">გაჩერებული ამანათები
+            </button>
+
+            <button type="submit"
+                    class="parcel-wrapper {% if status_filter == 'გატანილია' %}active-parcel-list{% endif %}"
+                    value="გატანილია"
+                    name="status">გატანილი ამანათები
+            </button>
+        </form>
+
+
+        <!-- Parcel Table -->
+        <table class="table mt-5">
+            <thead>
+            <tr class="table-success">
+                <th scope="col">ქვეყანა</th>
+                <th scope="col">თრექინგი</th>
+                <th scope="col">მისვლა</th>
+                <th scope="col">რეისი</th>
+                <th scope="col">წონა</th>
+                <th scope="col">ტრ.ფასი</th>
+                <th scope="col">გადახდა</th>
+                <th scope="col">დეკლ.</th>
+                <th scope="col">განბ.</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for parcel in parcels %}
+                <tr>
+                    <td class="table-secondary">
+                        <img src="
+
+
+
+                                {% if parcel.country.name == 'USA' %}{% static 'img/usa-flag.png' %}{% else %}{% static 'img/china-flag.png' %}{% endif %}"
+                             style="height: 20px; width: 30px"
+                             alt="flag">
+                    </td>
+                    <td class="table-secondary">{{ parcel.tracking_number }}</td>
+                    <td class="table-secondary">{{ parcel.delivery_time|date:"d-m-Y" }}</td>
+                    <td class="table-secondary">{{ parcel.flight|default:"- - -" }}</td>
+                    <td class="table-secondary">{{ parcel.weight }}</td>
+                    <td class="table-secondary">{{ parcel.transporting_fee }}</td>
+                    <td class="table-secondary">{% if parcel.is_paid %}<i class="fa-solid fa-check"></i>{% else %}
+                        <i class="fa-solid fa-xmark"></i>{% endif %}</td>
+                    <td class="table-secondary">{% if parcel.is_declared %}<i class="fa-solid fa-check"></i>{% else %}
+                        <i class="fa-solid fa-xmark"></i>{% endif %}</td>
+                    <td class="table-secondary">{% if parcel.custom_clearance %}
+                        <i class="fa-solid fa-check"></i>{% else %}<i class="fa-solid fa-xmark"></i>{% endif %}</td>
+                    <form method="post" action="{% url 'user:update_parcel_status' parcel.id %}">
+                        {% csrf_token %}
+                        {% if parcel.status.name == "ჩამოსულია" %}
+                            <td class="table-secondary">
+                                <button
+                                        class="btn btn-success {% if not parcel.is_paid %}disabled{% endif %}"
+                                        {% if not parcel.is_paid %}disabled data-bs-toggle="tooltip"
+                                        title="გთხოვთ გადაიხადოთ ტრანსპორტირების საფასური"{% endif %}>
+                                    გატანა
+                                </button>
+                            </td>
+                        {% endif %}
+                    </form>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+{% endblock %}

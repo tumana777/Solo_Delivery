@@ -39,7 +39,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.email
+        return f"{self.first_name_en} {self.last_name_en} - {self.room_number}"
 
     def save(self, *args, **kwargs):
         if not self.room_number:

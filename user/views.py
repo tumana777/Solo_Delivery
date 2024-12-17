@@ -1,8 +1,10 @@
-from django.shortcuts import get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, ListView, UpdateView
 
-from core.models import ChinaAddress, USAAddress
+from core.models import ChinaAddress, USAAddress, Status
+from parcel.models import Parcel
 from user.forms import CustomUserCreationForm
 from user.models import CustomUser
 
@@ -12,8 +14,9 @@ class UserRegistrationView(CreateView):
     template_name = 'register.html'
     success_url = reverse_lazy('user:login')
 
-class UserAddressesView(TemplateView):
+class UserAddressesView(LoginRequiredMixin, TemplateView):
     template_name = 'addresses.html'
+    login_url = reverse_lazy('user:login')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -49,3 +52,41 @@ class UserAddressesView(TemplateView):
         context['usa_address'] = usa_address
 
         return context
+
+class UserParcelsView(LoginRequiredMixin, ListView):
+    model = Parcel
+    template_name = 'room.html'
+    context_object_name = 'parcels'
+    login_url = 'user:login'
+
+    def get_queryset(self):
+        status_filter = self.request.GET.get('status', 'საწყობშია')
+        queryset = Parcel.objects.filter(user=self.request.user).select_related('flight', 'status', 'country')
+
+        if status_filter:
+            queryset = queryset.filter(status__name=status_filter)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_filter'] = self.request.GET.get('status', 'საწყობშია')
+
+        return context
+
+class UpdateParcelStatusView(LoginRequiredMixin, UpdateView):
+    model = Parcel
+    fields = []
+    login_url = reverse_lazy('user:login')
+
+    def form_valid(self, form):
+        status = get_object_or_404(Status, name="გატანილია")
+
+        self.object.status = status
+        self.object.save()
+
+        return redirect('user:room')
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Parcel, id=self.kwargs['pk'], user=self.request.user)
+

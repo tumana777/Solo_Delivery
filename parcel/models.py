@@ -19,15 +19,16 @@ class Parcel(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('კატეგორია'))
     price = models.DecimalField(_('ფასი'),null=True, blank=True, max_digits=10, decimal_places=2)
     currency = models.ForeignKey('core.Currency', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('ვალუტა'))
+    online_store = models.CharField(_('ონლაინ მაღაზია'), blank=True, max_length=100)
     branch = models.ForeignKey('core.Branch', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('ფილიალი'))
     status = models.ForeignKey('core.Status', on_delete=models.SET_NULL, null=True, verbose_name=_('სტატუსი'))
-    online_store = models.CharField(_('ონლაინ მაღაზია'), blank=True, max_length=100)
     delivery_time = models.DateField(_('ჩაბარების თარიღი'))
     taken_time = models.DateField(_('გატანის თარიღი'), blank=True, null=True)
     weight = models.DecimalField(_('წონა'), max_digits=5, decimal_places=2, null=True)
     custom_clearance = models.BooleanField(_('განბაჟება'), default=False)
     is_paid = models.BooleanField(_('გადახდილია'), default=False)
-    transporting_fee = models.DecimalField(_('ტრანსპორტირების საფასური'), max_digits=5, decimal_places=2, editable=False)
+    is_declared = models.BooleanField(_('დეკლარირებულია'), default=False)
+    transporting_fee = models.DecimalField(max_digits=5, decimal_places=2, editable=False, verbose_name=_('ტრ. საფასური'))
 
     class Meta:
         verbose_name = _('ამანათი')
@@ -37,7 +38,15 @@ class Parcel(models.Model):
         return self.tracking_number
 
     def save(self, *args, **kwargs):
+        if not self.branch:
+            self.branch = self.user.branch
+
         if not self.transporting_fee:
             self.transporting_fee = self.weight * self.country.transporting_price
+
+        if self.category and self.price and self.currency and self.online_store:
+            self.is_declared = True
+        else:
+            self.is_declared = False
 
         super().save(*args, **kwargs)

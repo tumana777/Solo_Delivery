@@ -64,9 +64,9 @@
                     {% if user.is_authenticated %}
                     <!-- Dropdown Menu -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle page-scroll" href="#" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-user mr-2"></i>{{ user.first_name_ka }} {{ user.last_name_ka }}</a>
+                            <a class="nav-link dropdown-toggle page-scroll" href="{% url 'user:room' %}" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-user mr-2"></i>{{ user.first_name_ka }} {{ user.last_name_ka }}</a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="#"><span class="item-text">ჩემი ოთახი</span></a>
+                                <a class="dropdown-item" href="{% url 'user:room' %}"><span class="item-text">ჩემი ოთახი</span></a>
                                 <div class="dropdown-items-divide-hr"></div>
                                 <a class="dropdown-item" href="{% url 'user:user_addresses' %}"><span class="item-text">მისამართები</span></a>
                                 <div class="dropdown-items-divide-hr"></div>

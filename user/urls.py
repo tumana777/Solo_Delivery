@@ -1,7 +1,6 @@
 from django.urls import path
-from .views import UserRegistrationView, UserAddressesView
+from .views import UserRegistrationView, UserAddressesView, UserParcelsView, UpdateParcelStatusView
 from django.contrib.auth.views import LoginView, LogoutView
-
 
 app_name = 'user'
 
@@ -10,4 +9,6 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='login.html', next_page='core:index'), name='login'),
     path('addresses/', UserAddressesView.as_view(), name='user_addresses'),
     path('logout/', LogoutView.as_view(next_page='user:login'), name='logout'),
+    path('room/parcels/', UserParcelsView.as_view(), name='room'),
+    path('parcel/<int:pk>/update_status/', UpdateParcelStatusView.as_view(), name='update_parcel_status'),
 ]
