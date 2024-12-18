@@ -34,3 +34,12 @@ class CustomUserCreationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+class UserBalanceUpdateForm(forms.Form):
+    amount = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        min_value=0.01,
+        label="თანხა",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'required': True}),
+    )

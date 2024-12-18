@@ -11,6 +11,7 @@ class CustomUser(AbstractUser):
     first_name_en = models.CharField(_('სახელი(ლათინურად)'), max_length=30)
     last_name_en = models.CharField(_('გვარი(ლათინურად)'), max_length=50)
     email = models.EmailField(_('ელ.ფოსტა'),unique=True)
+    balance = models.DecimalField(_('ბალანსი'), max_digits=12, decimal_places=2, default=0)
     personal_ID = models.CharField(
         _('პირადი ნომერი'),
         max_length=11,

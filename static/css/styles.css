@@ -65,6 +65,47 @@ html {
 	color: #FFFFFF;
 }
 
+.my-button {
+	background-color: #5f4dee;
+	color: #FFFFFF;
+	width: 220px;
+	height: 40px;
+	border-radius: 5px;
+	border: 1px solid #5f4dee;
+}
+
+.credit-wrapper {
+	background-color: #FFFFFF;
+	color: red;
+	width: 220px;
+	height: 40px;
+	border-radius: 5px;
+	border: 1px solid #5f4dee;
+}
+
+.green-color {
+	color: green;
+}
+
+.tooltip-text {
+    display: none;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+.tooltip-text.show {
+    display: block;
+}
+
 body, p {
 	color: #555; 
 	font: 400 1rem/1.625rem "Open Sans", sans-serif;;

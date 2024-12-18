@@ -1,11 +1,15 @@
+from datetime import datetime
+
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView, ListView, UpdateView
+from django.views.generic import CreateView, TemplateView, ListView, UpdateView, FormView
 
 from core.models import ChinaAddress, USAAddress, Status
 from parcel.models import Parcel
-from user.forms import CustomUserCreationForm
+from user.forms import CustomUserCreationForm, UserBalanceUpdateForm
 from user.models import CustomUser
 
 class UserRegistrationView(CreateView):
@@ -72,6 +76,14 @@ class UserParcelsView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['status_filter'] = self.request.GET.get('status', 'საწყობშია')
 
+        total_transporting_fee = Parcel.objects.filter(
+            user=self.request.user,
+            status__name="ჩამოსულია",
+            is_paid=False
+        ).aggregate(total_fee=Sum('transporting_fee'))['total_fee']
+
+        context['total_transporting_fee'] = total_transporting_fee or 0
+
         return context
 
 class UpdateParcelStatusView(LoginRequiredMixin, UpdateView):
@@ -83,6 +95,7 @@ class UpdateParcelStatusView(LoginRequiredMixin, UpdateView):
         status = get_object_or_404(Status, name="გატანილია")
 
         self.object.status = status
+        self.object.taken_time = datetime.now()
         self.object.save()
 
         return redirect('user:room')
@@ -90,3 +103,39 @@ class UpdateParcelStatusView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         return get_object_or_404(Parcel, id=self.kwargs['pk'], user=self.request.user)
 
+class UpdateParcelPaidView(LoginRequiredMixin, UpdateView):
+    model = Parcel
+    fields = []
+    login_url = reverse_lazy('user:login')
+
+    def form_valid(self, form):
+        if self.object.user.balance < self.object.transporting_fee:
+            return redirect('user:room')
+
+        self.object.is_paid = True
+        self.object.user.balance -= self.object.transporting_fee
+        self.object.user.save()
+        self.object.save()
+
+        return redirect('user:room')
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Parcel, id=self.kwargs['pk'], user=self.request.user)
+
+class UserBalanceUpdateView(LoginRequiredMixin, FormView):
+    template_name = 'room.html'
+    form_class = UserBalanceUpdateForm
+    login_url = reverse_lazy('user:login')
+    success_url = reverse_lazy('user:room')
+
+    def form_valid(self, form):
+        user = self.request.user
+        amount = form.cleaned_data['amount']
+        user.balance += amount
+        user.save()
+        messages.success(self.request, f"თქვენი ბალანსი განახლდა: +{amount:.2f}")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "გთხოვთ, შეიყვანეთ სწორი თანხა.")
+        return super().form_invalid(form)

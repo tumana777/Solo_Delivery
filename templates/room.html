@@ -6,6 +6,29 @@
     <header class="ex-header" style="padding-top: 0; padding-bottom: 7rem;">
     </header>
     <div class="container">
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="my-button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <i class="fa-solid fa-plus"></i> ამანათის დამატება
+            </button>
+            <div class="d-flex" style="gap: 10px">
+                <button class="credit-wrapper {% if total_transporting_fee == 0 %} green-color {% endif %}" style="cursor: default">
+                    დავალიანება {{ total_transporting_fee|floatformat:2 }}
+                </button>
+                <button class="credit-wrapper" style="cursor: default">ბალანსი {{ user.balance }}</button>
+                <button type="button" class="my-button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <i class="fa-solid fa-credit-card"></i> ბალანსის შევსება
+                </button>
+            </div>
+        </div>
         <form method="get" class="mt-5 d-flex justify-content-between flex-wrap">
             <button type="submit"
                     class="parcel-wrapper {% if status_filter == 'საწყობშია' %}active-parcel-list{% endif %}"
@@ -44,9 +67,8 @@
             </button>
         </form>
 
-
         <!-- Parcel Table -->
-        <table class="table mt-5">
+        <table class="table mt-3 mb-5">
             <thead>
             <tr class="table-success">
                 <th scope="col">ქვეყანა</th>
@@ -55,9 +77,17 @@
                 <th scope="col">რეისი</th>
                 <th scope="col">წონა</th>
                 <th scope="col">ტრ.ფასი</th>
-                <th scope="col">გადახდა</th>
+                {% if status_filter == 'ჩამოსულია' %}
+                    <th scope="col">გადახდა</th>
+                {% endif %}
                 <th scope="col">დეკლ.</th>
                 <th scope="col">განბ.</th>
+                {% if status_filter == 'ჩამოსულია' %}
+                    <th scope="col">გატანა</th>
+                {% endif %}
+                {% if status_filter == 'გატანილია' %}
+                    <th scope="col">გატ.თარიღი</th>
+                {% endif %}
             </tr>
             </thead>
             <tbody>
@@ -65,9 +95,6 @@
                 <tr>
                     <td class="table-secondary">
                         <img src="
-
-
-
                                 {% if parcel.country.name == 'USA' %}{% static 'img/usa-flag.png' %}{% else %}{% static 'img/china-flag.png' %}{% endif %}"
                              style="height: 20px; width: 30px"
                              alt="flag">
@@ -77,35 +104,92 @@
                     <td class="table-secondary">{{ parcel.flight|default:"- - -" }}</td>
                     <td class="table-secondary">{{ parcel.weight }}</td>
                     <td class="table-secondary">{{ parcel.transporting_fee }}</td>
-                    <td class="table-secondary">{% if parcel.is_paid %}<i class="fa-solid fa-check"></i>{% else %}
-                        <i class="fa-solid fa-xmark"></i>{% endif %}</td>
+                    {% if status_filter == 'ჩამოსულია' %}
+                        <td class="table-secondary position-relative">
+                            {% if parcel.is_paid %}
+                                <i class="fa-solid fa-check"></i>
+                            {% else %}
+                                <form method="post" action="{% url 'user:update_parcel_paid' parcel.pk %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-success {% if user.balance < parcel.transporting_fee %} disabled {% endif %}"
+                                            {% if user.balance < parcel.transporting_fee %}disabled{% endif %}>
+                                        გადახდა
+                                    </button>
+                                    {% if user.balance < parcel.transporting_fee %}
+                                        <div class="tooltip-text"> არასაკმარისი ბალანსი</div>
+                                    {% endif %}
+                                </form>
+                            {% endif %}
+                        </td>
+                    {% endif %}
                     <td class="table-secondary">{% if parcel.is_declared %}<i class="fa-solid fa-check"></i>{% else %}
                         <i class="fa-solid fa-xmark"></i>{% endif %}</td>
                     <td class="table-secondary">{% if parcel.custom_clearance %}
                         <i class="fa-solid fa-check"></i>{% else %}<i class="fa-solid fa-xmark"></i>{% endif %}</td>
-                    <form method="post" action="{% url 'user:update_parcel_status' parcel.id %}">
+                    <form method="post" action="{% url 'user:update_parcel_status' parcel.pk %}">
                         {% csrf_token %}
                         {% if parcel.status.name == "ჩამოსულია" %}
-                            <td class="table-secondary">
-                                <button
-                                        class="btn btn-success {% if not parcel.is_paid %}disabled{% endif %}"
-                                        {% if not parcel.is_paid %}disabled data-bs-toggle="tooltip"
-                                        title="გთხოვთ გადაიხადოთ ტრანსპორტირების საფასური"{% endif %}>
+                            <td class="table-secondary position-relative">
+                                <button class="btn btn-success {% if not parcel.is_paid %}disabled{% endif %}"
+                                        {% if not parcel.is_paid %}disabled{% endif %}>
                                     გატანა
                                 </button>
+                                {% if not parcel.is_paid %}
+                                    <div class="tooltip-text"> გადაიხადეთ ტრანსპორტირების თანხა</div>
+                                {% endif %}
                             </td>
                         {% endif %}
                     </form>
+                    {% if status_filter == 'გატანილია' %}
+                        <td class="table-secondary">{{ parcel.taken_time|date:"d-m-Y" }}</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+
+        <!-- Balance Update Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="post" action="{% url 'user:update_balance' %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">შეიყვანეთ თანხის ოდენობა</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="id-amount" class="col-form-label">თანხა:</label>
+                                <input type="number" name="amount" class="form-control" id="id-amount" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+{#                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>#}
+                            <button type="submit" class="btn btn-primary">შევსება</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
+        document.addEventListener("DOMContentLoaded", function () {
+            const cells = document.querySelectorAll(".table-secondary.position-relative");
+
+            cells.forEach(cell => {
+                const button = cell.querySelector("button.disabled");
+                const tooltip = cell.querySelector(".tooltip-text");
+
+                if (button && tooltip) {
+                    cell.addEventListener("mouseenter", () => {
+                        tooltip.classList.add("show");
+                    });
+
+                    cell.addEventListener("mouseleave", () => {
+                        tooltip.classList.remove("show");
+                    });
+                }
             });
         });
     </script>
