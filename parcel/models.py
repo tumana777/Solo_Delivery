@@ -22,7 +22,7 @@ class Parcel(models.Model):
     online_store = models.CharField(_('ონლაინ მაღაზია'), blank=True, max_length=100)
     branch = models.ForeignKey('core.Branch', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('ფილიალი'))
     status = models.ForeignKey('core.Status', on_delete=models.SET_NULL, null=True, verbose_name=_('სტატუსი'))
-    delivery_time = models.DateField(_('ჩაბარების თარიღი'))
+    delivery_time = models.DateField(_('ჩაბარების თარიღი'), auto_now_add=True)
     taken_time = models.DateField(_('გატანის თარიღი'), blank=True, null=True)
     weight = models.DecimalField(_('წონა'), max_digits=5, decimal_places=2, null=True)
     custom_clearance = models.BooleanField(_('განბაჟება'), default=False)

@@ -3,11 +3,13 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, ListView, UpdateView, FormView
 
 from core.models import ChinaAddress, USAAddress, Status
+from parcel.forms import ParcelDeclareForm
 from parcel.models import Parcel
 from user.forms import CustomUserCreationForm, UserBalanceUpdateForm
 from user.models import CustomUser
@@ -51,7 +53,6 @@ class UserAddressesView(LoginRequiredMixin, TemplateView):
             "phone": usa_static_address.cell_phone,
         }
 
-        # Add data to the context
         context['china_address'] = china_address
         context['usa_address'] = usa_address
 
@@ -65,10 +66,12 @@ class UserParcelsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         status_filter = self.request.GET.get('status', 'საწყობშია')
-        queryset = Parcel.objects.filter(user=self.request.user).select_related('flight', 'status', 'country')
+        queryset = Parcel.objects.filter(user=self.request.user).select_related('flight', 'status', 'country').order_by('-id')
 
         if status_filter:
             queryset = queryset.filter(status__name=status_filter)
+            if status_filter == "გატანილია":
+                queryset = queryset.order_by('-taken_time')
 
         return queryset
 
@@ -139,3 +142,20 @@ class UserBalanceUpdateView(LoginRequiredMixin, FormView):
     def form_invalid(self, form):
         messages.error(self.request, "გთხოვთ, შეიყვანეთ სწორი თანხა.")
         return super().form_invalid(form)
+
+class UserParcelDeclareView(LoginRequiredMixin, UpdateView):
+    model = Parcel
+    form_class = ParcelDeclareForm
+    template_name = "parcel_update_form.html"
+    login_url = reverse_lazy('user:login')
+    success_url = reverse_lazy('user:room')
+
+    def get_queryset(self):
+        return Parcel.objects.filter(user=self.request.user)
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            parcel = self.get_queryset().get(pk=self.kwargs['pk'])
+        except Parcel.DoesNotExist:
+            raise Http404("Parcel not found or you do not have permission to declare this parcel.")
+        return super().dispatch(request, *args, **kwargs)

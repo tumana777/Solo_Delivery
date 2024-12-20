@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     UserRegistrationView, UserAddressesView, UserParcelsView,
-    UpdateParcelStatusView, UpdateParcelPaidView, UserBalanceUpdateView
+    UpdateParcelStatusView, UpdateParcelPaidView, UserBalanceUpdateView,
+    UserParcelDeclareView
 )
 from django.contrib.auth.views import LoginView, LogoutView
 
@@ -16,4 +17,5 @@ urlpatterns = [
     path('parcel/<int:pk>/update_status/', UpdateParcelStatusView.as_view(), name='update_parcel_status'),
     path('parcel/<int:pk>/update_paid/', UpdateParcelPaidView.as_view(), name='update_parcel_paid'),
     path('update_balance/', UserBalanceUpdateView.as_view(), name='update_balance'),
+    path('parcel/<int:pk>/update/', UserParcelDeclareView.as_view(), name='update_parcel'),
 ]
