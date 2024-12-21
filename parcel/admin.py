@@ -15,6 +15,7 @@ class ParcelAdmin(admin.ModelAdmin):
     )
 
     def formatted_delivery_time(self, obj):
-        return obj.delivery_time.strftime('%d-%m-%Y')
+        if obj.delivery_time:
+            return obj.delivery_time.strftime('%d-%m-%Y')
 
     formatted_delivery_time.short_description = _('მისვლის თარიღი')

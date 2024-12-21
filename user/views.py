@@ -3,13 +3,14 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
-from django.http import Http404
+from django.http import Http404, JsonResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView, ListView, UpdateView, FormView
+from django.views.generic import CreateView, TemplateView, ListView, UpdateView, FormView, DeleteView
 
 from core.models import ChinaAddress, USAAddress, Status
-from parcel.forms import ParcelDeclareForm
+from parcel.forms import ParcelDeclareForm, ParcelAddForm
 from parcel.models import Parcel
 from user.forms import CustomUserCreationForm, UserBalanceUpdateForm
 from user.models import CustomUser
@@ -89,7 +90,24 @@ class UserParcelsView(LoginRequiredMixin, ListView):
 
         return context
 
-class UpdateParcelStatusView(LoginRequiredMixin, UpdateView):
+class AddParcelView(LoginRequiredMixin, CreateView):
+    model = Parcel
+    form_class = ParcelAddForm
+    login_url = reverse_lazy('user:login')
+    success_url = reverse_lazy('user:room')
+    template_name = 'add_parcel.html'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.status = Status.objects.get(name="მოლოდინშია")
+        form.save()
+        return JsonResponse({"success": True})
+
+    def form_invalid(self, form):
+        html = render_to_string(self.template_name, {"form": form}, self.request)
+        return JsonResponse({"success": False, "html": html})
+
+class ParcelStatusUpdateView(LoginRequiredMixin, UpdateView):
     model = Parcel
     fields = []
     login_url = reverse_lazy('user:login')
@@ -106,7 +124,7 @@ class UpdateParcelStatusView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         return get_object_or_404(Parcel, id=self.kwargs['pk'], user=self.request.user)
 
-class UpdateParcelPaidView(LoginRequiredMixin, UpdateView):
+class ParcelPaidUpdateView(LoginRequiredMixin, UpdateView):
     model = Parcel
     fields = []
     login_url = reverse_lazy('user:login')
@@ -159,3 +177,16 @@ class UserParcelDeclareView(LoginRequiredMixin, UpdateView):
         except Parcel.DoesNotExist:
             raise Http404("Parcel not found or you do not have permission to declare this parcel.")
         return super().dispatch(request, *args, **kwargs)
+
+class UserParcelDeleteView(LoginRequiredMixin, DeleteView):
+    model = Parcel
+    success_url = reverse_lazy('user:room')
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect(self.success_url)
+
+    def post(self, request, *args, **kwargs):
+        parcel = self.get_object()
+        if parcel.user != request.user:
+            return HttpResponseForbidden("You are not allowed to delete this parcel.")
+        return super().post(request, *args, **kwargs)

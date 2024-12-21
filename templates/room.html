@@ -16,7 +16,7 @@
             </div>
         {% endif %}
         <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="my-button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" class="my-button" data-bs-toggle="modal" data-bs-target="#addParcelModal">
                 <i class="fa-solid fa-plus"></i> ამანათის დამატება
             </button>
             <div class="d-flex" style="gap: 10px">
@@ -73,20 +73,26 @@
             <tr class="table-success">
                 <th scope="col">ქვეყანა</th>
                 <th scope="col">თრექინგი</th>
-                <th scope="col">მისვლა</th>
-                <th scope="col">რეისი</th>
-                <th scope="col">წონა</th>
-                <th scope="col">ტრ.ფასი</th>
-                {% if status_filter == 'ჩამოსულია' %}
-                    <th scope="col">გადახდა</th>
-                {% endif %}
-                <th scope="col">დეკლ.</th>
-                <th scope="col">განბ.</th>
-                {% if status_filter == 'ჩამოსულია' %}
-                    <th scope="col">გატანა</th>
-                {% endif %}
-                {% if status_filter == 'გატანილია' %}
-                    <th scope="col">გატ.თარიღი</th>
+                {% if status_filter == 'მოლოდინშია' %}
+                    <th scope="col">დამატების თარიღი</th>
+                    <th scope="col">დეკლარაცია</th>
+                    <th scope="col">წაშლა</th>
+                {% else %}
+                    <th scope="col">მისვლა</th>
+                    <th scope="col">რეისი</th>
+                    <th scope="col">წონა</th>
+                    <th scope="col">ტრ.ფასი</th>
+                    {% if status_filter == 'ჩამოსულია' %}
+                        <th scope="col">გადახდა</th>
+                    {% endif %}
+                    <th scope="col">დეკლ.</th>
+                    <th scope="col">განბ.</th>
+                    {% if status_filter == 'ჩამოსულია' %}
+                        <th scope="col">გატანა</th>
+                    {% endif %}
+                    {% if status_filter == 'გატანილია' %}
+                        <th scope="col">გატ.თარიღი</th>
+                    {% endif %}
                 {% endif %}
             </tr>
             </thead>
@@ -100,58 +106,80 @@
                              alt="flag">
                     </td>
                     <td class="table-secondary">{{ parcel.tracking_number }}</td>
-                    <td class="table-secondary">{{ parcel.delivery_time|date:"d-m-Y" }}</td>
-                    <td class="table-secondary">{{ parcel.flight|default:"- - -" }}</td>
-                    <td class="table-secondary">{{ parcel.weight }}</td>
-                    <td class="table-secondary">{{ parcel.transporting_fee }}</td>
-                    {% if status_filter == 'ჩამოსულია' %}
-                        <td class="table-secondary position-relative">
-                            {% if parcel.is_paid %}
-                                <i class="fa-solid fa-check"></i>
-                            {% else %}
-                                <form method="post" action="{% url 'user:update_parcel_paid' parcel.pk %}">
-                                    {% csrf_token %}
-                                    <button class="btn btn-success {% if user.balance < parcel.transporting_fee %} disabled {% endif %}"
-                                            {% if user.balance < parcel.transporting_fee %}disabled{% endif %}>
-                                        გადახდა
-                                    </button>
-                                    {% if user.balance < parcel.transporting_fee %}
-                                        <div class="tooltip-text"> არასაკმარისი ბალანსი</div>
-                                    {% endif %}
-                                </form>
-                            {% endif %}
-                        </td>
-                    {% endif %}
-                    <td class="table-secondary">
-                        {% if parcel.is_declared %}
-                            <i class="fa-solid fa-check"></i>
-                        {% else %}
-                            <button class="btn btn-success"
-                                    data-bs-toggle="modal"
+                    {% if status_filter == 'მოლოდინშია' %}
+                        <td class="table-secondary">{{ parcel.created_at|date:"d-m-Y" }}</td>
+                        <td class="table-secondary">
+                            <a style="cursor: pointer" data-bs-toggle="modal"
                                     data-bs-target="#updateParcelModal"
-                                    data-parcel-id="{{ parcel.id }}">
-                                დეკლარირება
-                            </button>
-                        {% endif %}
-                    </td>
-                    <td class="table-secondary">{% if parcel.custom_clearance %}
-                        <i class="fa-solid fa-check"></i>{% else %}<i class="fa-solid fa-xmark"></i>{% endif %}</td>
-                    <form method="post" action="{% url 'user:update_parcel_status' parcel.pk %}">
-                        {% csrf_token %}
-                        {% if parcel.status.name == "ჩამოსულია" %}
+                                    data-parcel-id="{{ parcel.id }}"
+                                    data-tracking-number="{{ parcel.tracking_number }}">
+                                {% if parcel.is_declared %}
+                                    <img src="{% static 'img/declared.png' %}" alt="declared">
+                                {% else %}
+                                    <img src="{% static 'img/declare.png' %}" alt="declare">
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td class="table-secondary">
+                            <form method="post" action="{% url 'user:delete_parcel' parcel.id %}">
+                                {% csrf_token %}
+                                <input style="margin-top: 5px" type="image" src="{% static 'img/delete.png' %}" alt="delete" />
+                            </form>
+                        </td>
+                    {% else %}
+                        <td class="table-secondary">{{ parcel.delivery_time|date:"d-m-Y" }}</td>
+                        <td class="table-secondary">{{ parcel.flight|default:"- - -" }}</td>
+                        <td class="table-secondary">{{ parcel.weight }}</td>
+                        <td class="table-secondary">{{ parcel.transporting_fee }}</td>
+                        {% if status_filter == 'ჩამოსულია' %}
                             <td class="table-secondary position-relative">
-                                <button class="btn btn-success {% if not parcel.is_paid %}disabled{% endif %}"
-                                        {% if not parcel.is_paid %}disabled{% endif %}>
-                                    გატანა
-                                </button>
-                                {% if not parcel.is_paid %}
-                                    <div class="tooltip-text"> გადაიხადეთ ტრანსპორტირების თანხა</div>
+                                {% if parcel.is_paid %}
+                                    <i class="fa-solid fa-check"></i>
+                                {% else %}
+                                    <form method="post" action="{% url 'user:update_parcel_paid' parcel.pk %}">
+                                        {% csrf_token %}
+                                        <button class="btn btn-success {% if user.balance < parcel.transporting_fee %} disabled {% endif %}"
+                                                {% if user.balance < parcel.transporting_fee %}disabled{% endif %}>
+                                            გადახდა
+                                        </button>
+                                        {% if user.balance < parcel.transporting_fee %}
+                                            <div class="tooltip-text"> არასაკმარისი ბალანსი</div>
+                                        {% endif %}
+                                    </form>
                                 {% endif %}
                             </td>
                         {% endif %}
-                    </form>
-                    {% if status_filter == 'გატანილია' %}
-                        <td class="table-secondary">{{ parcel.taken_time|date:"d-m-Y" }}</td>
+                        <td class="table-secondary">
+                            <a style="cursor: pointer" data-bs-toggle="modal"
+                                    data-bs-target="#updateParcelModal"
+                                    data-parcel-id="{{ parcel.id }}"
+                                    data-tracking-number="{{ parcel.tracking_number }}">
+                                {% if parcel.is_declared %}
+                                    <img src="{% static 'img/declared.png' %}" alt="declared">
+                                {% else %}
+                                    <img src="{% static 'img/declare.png' %}" alt="declare">
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td class="table-secondary">{% if parcel.custom_clearance %}
+                            <i class="fa-solid fa-check"></i>{% else %}<i class="fa-solid fa-xmark"></i>{% endif %}</td>
+                        <form method="post" action="{% url 'user:update_parcel_status' parcel.pk %}">
+                            {% csrf_token %}
+                            {% if parcel.status.name == "ჩამოსულია" %}
+                                <td class="table-secondary position-relative">
+                                    <button class="btn btn-success {% if not parcel.is_paid %}disabled{% endif %}"
+                                            {% if not parcel.is_paid %}disabled{% endif %}>
+                                        გატანა
+                                    </button>
+                                    {% if not parcel.is_paid %}
+                                        <div class="tooltip-text"> გადაიხადეთ ტრანსპორტირების თანხა</div>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </form>
+                        {% if status_filter == 'გატანილია' %}
+                            <td class="table-secondary">{{ parcel.taken_time|date:"d-m-Y" }}</td>
+                        {% endif %}
                     {% endif %}
                 </tr>
             {% endfor %}
@@ -183,21 +211,94 @@
             </div>
         </div>
 
-        <!-- Parcel Declare Modal -->
-        <div class="modal fade" id="updateParcelModal" tabindex="-1" aria-labelledby="updateParcelModalLabel" aria-hidden="true">
+        <!-- Parcel Add Modal -->
+        <div class="modal fade" id="addParcelModal" tabindex="-1" aria-labelledby="addParcelModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="updateParcelModalLabel">დეკლარაცია</h1>
+                        <h1 class="modal-title fs-5" style="color: #5f4dee" id="addParcelModalLabel">ამანათის დამატება</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body" id="updateParcelFormContainer">
+                    <div class="modal-body" id="addParcelFormContainer">
                         <!-- Form will be loaded dynamically here -->
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Parcel Declare Modal -->
+        <div class="modal fade" id="updateParcelModal" tabindex="-1" aria-labelledby="updateParcelModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" style="color: #5f4dee" id="updateParcelModalLabel">დეკლარაცია - </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="updateParcelFormContainer">
+                        <!-- Form will be loaded dynamically here -->
+                        <div class="text-center">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Add Parcel Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("addParcelModal");
+            const modalBody = document.getElementById("addParcelFormContainer");
+
+            // Load the form dynamically when the modal is shown
+            modal.addEventListener("show.bs.modal", function () {
+                fetch("{% url 'user:add_parcel' %}")
+                    .then(response => response.text())
+                    .then(html => {
+                        modalBody.innerHTML = html; // Insert form into modal
+                        attachFormSubmitHandler(); // Attach the submit handler after form is loaded
+                    });
+            });
+
+            function attachFormSubmitHandler() {
+                const form = modalBody.querySelector("form");
+
+                if (!form) {
+                    console.error("Form not found in modal body.");
+                    return;
+                }
+
+                form.addEventListener("submit", function (event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+
+                    fetch(form.action, {
+                        method: form.method,
+                        body: formData,
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload(); // Reload on success
+                            } else {
+                                modalBody.innerHTML = data.html; // Replace modal body with error form
+                                attachFormSubmitHandler(); // Reattach handler after re-render
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error submitting the form:", error);
+                        });
+                });
+            }
+        });
+    </script>
+
+    <!-- Parcel Declare Script -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const modal = document.getElementById("updateParcelModal");
@@ -216,6 +317,26 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const updateParcelModal = document.getElementById('updateParcelModal');
+
+            // Listen for the modal to be shown
+            updateParcelModal.addEventListener('show.bs.modal', function (event) {
+                // Get the element that triggered the modal
+                const button = event.relatedTarget;
+
+                // Extract the tracking number from the data attribute
+                const trackingNumber = button.getAttribute('data-tracking-number');
+
+                // Update the modal title
+                const modalTitle = updateParcelModal.querySelector('#updateParcelModalLabel');
+                modalTitle.textContent = `დეკლარაცია - ${trackingNumber}`;
+            });
+        });
+    </script>
+
+    <!-- Tooltip Script -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const cells = document.querySelectorAll(".table-secondary.position-relative");
