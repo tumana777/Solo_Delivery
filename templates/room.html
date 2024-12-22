@@ -21,9 +21,9 @@
             </button>
             <div class="d-flex" style="gap: 10px">
                 <button class="credit-wrapper {% if total_transporting_fee == 0 %} green-color {% endif %}" style="cursor: default">
-                    დავალიანება {{ total_transporting_fee|floatformat:2 }}
+                    დავალიანება {{ total_transporting_fee|floatformat:2 }} ₾
                 </button>
-                <button class="credit-wrapper" style="cursor: default">ბალანსი {{ user.balance }}</button>
+                <button class="credit-wrapper" style="cursor: default">ბალანსი {{ user.balance }} ₾</button>
                 <button type="button" class="my-button" data-bs-toggle="modal" data-bs-target="#balanceModal">
                     <i class="fa-solid fa-credit-card"></i> ბალანსის შევსება
                 </button>
@@ -81,7 +81,7 @@
                     <th scope="col">მისვლა</th>
                     <th scope="col">რეისი</th>
                     <th scope="col">წონა</th>
-                    <th scope="col">ტრ.ფასი</th>
+                    <th scope="col">ტრ.ფასი ₾</th>
                     {% if status_filter == 'ჩამოსულია' %}
                         <th scope="col">გადახდა</th>
                     {% endif %}

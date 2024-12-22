@@ -1,3 +1,5 @@
+from .utils import get_exchange_rate
+from decimal import Decimal
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -42,7 +44,17 @@ class Parcel(models.Model):
     def save(self, *args, **kwargs):
         self.branch = self.user.branch
 
-        self.transporting_fee = self.weight * self.country.transporting_price
+        transporting_fee_rate = Decimal(get_exchange_rate("USD"))
+        self.transporting_fee = self.weight * self.country.transporting_price * transporting_fee_rate
+
+        try:
+            rate = Decimal(get_exchange_rate(self.currency.name))
+        except ValueError:
+            rate = 1
+
+        price_in_gel = self.price * rate if self.price else 0
+
+        self.custom_clearance = price_in_gel > 300
 
         if self.category and self.price and self.currency and self.online_store:
             self.is_declared = True
