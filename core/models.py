@@ -35,7 +35,7 @@ class Status(models.Model):
 class Flight(models.Model):
     country = models.ForeignKey('Country', on_delete=models.CASCADE)
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, verbose_name=_('სტატუსი'))
-    departure_date = models.DateField(_("გამოფრენის თარიღი"))
+    departure_date = models.DateField(_("გამოფრენის თარიღი"), auto_now_add=True)
     estimated_arrival_date = models.DateField(_("ჩამოფრენის სავარაუდო თარიღი"))
     arrival_date = models.DateField(_("ჩამოფრენის თარიღი"), null=True, blank=True)
     flight_number = models.CharField(_("რეისის ნომერი"), max_length=10, unique=True, editable=False)
@@ -53,6 +53,10 @@ class Flight(models.Model):
             last_flight = Flight.objects.filter(country=self.country).order_by('-id').first()
             next_number = 1 if not last_flight else int(last_flight.flight_number[2:]) + 1
             self.flight_number = f"{country_code}{next_number:05d}"
+
+        if not self.pk and not self.status:
+            self.status = Status.objects.get(name="გზაშია")
+
         super().save(*args, **kwargs)
 
 class Branch(models.Model):

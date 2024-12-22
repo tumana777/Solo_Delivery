@@ -40,22 +40,22 @@
                         <div class="swiper-container image-slider">
                             <div class="swiper-wrapper">
                                 <div class="swiper-slide">
-                                    <a target="blank" href="https://taobao.com/"><img class="img-fluid" src="{% static 'img/taobao.png' %}" alt="taobao"></a>
+                                    <a target="blank" href="https://taobao.com/"><img class="img-fluid" style="height: 60px;" src="{% static 'img/taobao.png' %}" alt="taobao"></a>
                                 </div>
                                 <div class="swiper-slide">
-                                    <a target="blank" href="https://alibaba.com/"><img class="img-fluid" src="{% static 'img/alibaba.png' %}" alt="alibaba"></a>
+                                    <a target="blank" href="https://alibaba.com/"><img class="img-fluid" style="height: 60px;" src="{% static 'img/alibaba.png' %}" alt="alibaba"></a>
                                 </div>
                                 <div class="swiper-slide">
-                                    <a target="blank" href="https://ebay.com/"><img class="img-fluid" src="{% static 'img/ebay.png' %}" alt="ebay"></a>
+                                    <a target="blank" href="https://ebay.com/"><img class="img-fluid" style="height: 60px;" src="{% static 'img/ebay.png' %}" alt="ebay"></a>
                                 </div>
                                 <div class="swiper-slide">
-                                    <a target="blank" href="https://amazon.com/"><img class="img-fluid" src="{% static 'img/amazon.png' %}" alt="amazon"></a>
+                                    <a target="blank" href="https://amazon.com/"><img class="img-fluid" style="height: 60px;" src="{% static 'img/amazon.png' %}" alt="amazon"></a>
                                 </div>
                                 <div class="swiper-slide">
-                                    <a target="blank" href="https://temu.com/"><img class="img-fluid" src="{% static 'img/temu.png' %}" alt="temu"></a>
+                                    <a target="blank" href="https://temu.com/"><img class="img-fluid" style="height: 60px;" src="{% static 'img/temu.png' %}" alt="temu"></a>
                                 </div>
                                 <div class="swiper-slide">
-                                    <a target="blank" href="https://aliexpress.com/"><img class="img-fluid" src="{% static 'img/aliexpress.png' %}" alt="aliexpress"></a>
+                                    <a target="blank" href="https://aliexpress.com/"><img class="img-fluid" style="height: 60px;" src="{% static 'img/aliexpress.png' %}" alt="aliexpress"></a>
                                 </div>
                             </div> <!-- end of swiper-wrapper -->
                         </div> <!-- end of swiper container -->
@@ -68,4 +68,29 @@
     </div> <!-- end of slider-1 -->
     <!-- end of customers -->
 
+    <div class="container">
+        <h3 style="color: #5f4def">რეისების განრიგი</h3>
+        <table class="table mt-3 mb-5">
+            <thead>
+                <tr class="table-success">
+                    <th scope="col">რეისი</th>
+                    <th scope="col">სტატუსი</th>
+                    <th scope="col">გამოფრენის თარიღი</th>
+                    <th scope="col">ჩამოფრენის სავარაუდო თარიღი</th>
+                    <th scope="col">ჩამოფრენის თარიღი</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in flights %}
+                    <tr>
+                        <td class="table-secondary">{{ flight }}</td>
+                        <td class="table-secondary">{{ flight.status }}</td>
+                        <td class="table-secondary">{{ flight.departure_date|date:"d-m-Y" }}</td>
+                        <td class="table-secondary">{{ flight.estimated_arrival_date|date:"d-m-Y" }}</td>
+                        <td class="table-secondary">{{ flight.arrival_date|date:"d-m-Y" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
