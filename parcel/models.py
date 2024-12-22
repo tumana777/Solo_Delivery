@@ -48,7 +48,10 @@ class Parcel(models.Model):
         self.transporting_fee = self.weight * self.country.transporting_price * transporting_fee_rate
 
         try:
-            rate = Decimal(get_exchange_rate(self.currency.name))
+            if self.currency:
+                rate = Decimal(get_exchange_rate(self.currency.name))
+            else:
+                rate = 1
         except ValueError:
             rate = 1
 
@@ -60,5 +63,8 @@ class Parcel(models.Model):
             self.is_declared = True
         else:
             self.is_declared = False
+
+        if self.flight and self.status and self.status.name != "გატანილია":
+            self.status = self.flight.status
 
         super().save(*args, **kwargs)

@@ -40,12 +40,18 @@ class FlightAdmin(admin.ModelAdmin):
 
     def set_status_to_in_transit(self, request, queryset):
         status_in_transit = Status.objects.get(name="გზაშია")
-        queryset.update(status=status_in_transit, arrival_date=None)
+        for flight in queryset:
+            flight.status = status_in_transit
+            flight.arrival_date = None
+            flight.save()
         self.message_user(request, _("რეის(ებ)ის სტატუსი განახლდა."))
 
     def set_status_to_arrived(self, request, queryset):
         status_arrived = Status.objects.get(name="ჩამოსულია")
-        queryset.update(status=status_arrived, arrival_date=now().date())
+        for flight in queryset:
+            flight.status = status_arrived
+            flight.arrival_date = now().date()
+            flight.save()
         self.message_user(request, _("რეის(ებ)ის სტატუსი განახლდა."))
 
     set_status_to_in_transit.short_description = "სტატუსის შეცვლა - 'გზაშია'"
