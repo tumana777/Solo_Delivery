@@ -27,8 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-CRISPY_TEMPLATE_PACK = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,10 +43,21 @@ INSTALLED_APPS = [
     # Third-party packages
     'debug_toolbar',
     'crispy_forms',
-    'crispy_bootstrap5',
+    'crispy_bootstrap4',
+    'rest_framework',
+    'django_filters',
 ]
 
 AUTH_USER_MODEL = 'user.CustomUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+            'django_filters.rest_framework.DjangoFilterBackend',
+            'rest_framework.filters.SearchFilter',
+        ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 15,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -24,6 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('user/', include('user.urls', namespace='user')),
+    path('api/', include('api.urls', namespace='api')),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ] + debug_toolbar_urls()
 
 if settings.DEBUG:
